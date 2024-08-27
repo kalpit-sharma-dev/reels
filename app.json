@@ -3,6 +3,7 @@
     "name": "InstagramClone",
     "slug": "InstagramClone",
     "version": "1.0.0",
+    "platforms": ["ios", "android"],
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
@@ -12,9 +13,17 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "This app needs access to the camera to take photos and record videos."
+      }
+
     },
     "android": {
+      "permissions": [
+        "CAMERA",
+        "WRITE_EXTERNAL_STORAGE"
+      ],
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"

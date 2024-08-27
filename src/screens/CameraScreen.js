@@ -1,6 +1,5 @@
-// src/screens/CameraScreen.js
 import React, { useState, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { Camera } from 'expo-camera';
 import { useIsFocused } from '@react-navigation/native';
 
@@ -15,10 +14,12 @@ export default function CameraScreen() {
   const isFocused = useIsFocused();
 
   useEffect(() => {
-    (async () => {
-      const { status } = await Camera.requestPermissionsAsync();
+    const getPermissions = async () => {
+      const { status } = await Camera.requestCameraPermissionsAsync();
       setHasPermission(status === 'granted');
-    })();
+    };
+
+    getPermissions();
 
     return () => {
       clearInterval(timerRef.current);
@@ -32,13 +33,11 @@ export default function CameraScreen() {
         setIsRecording(true);
         setIsProcessing(false);
         setRecordingDuration(0);
-        const video = await cameraRef.recordAsync({ maxDuration: 60 }); // maxDuration is in seconds (1 minute)
+        const video = await cameraRef.recordAsync({ maxDuration: 60 });
         console.log('Video recorded:', video.uri);
-        // Handle the video, save it, or navigate to another screen to preview
+        stopRecording();
       } catch (e) {
         console.error(e);
-      } finally {
-        stopRecording();
       }
     }
   };
@@ -59,7 +58,6 @@ export default function CameraScreen() {
       setRecordingDuration((prevDuration) => prevDuration + 1);
     }, 1000);
 
-    // Stop recording after 60 seconds
     recordingTimerRef.current = setTimeout(() => {
       if (isRecording) {
         stopRecording();
@@ -72,7 +70,6 @@ export default function CameraScreen() {
       try {
         const photo = await cameraRef.takePictureAsync();
         console.log('Photo taken:', photo.uri);
-        // Handle the photo, save it, or navigate to another screen to preview
       } catch (e) {
         console.error(e);
       }
@@ -80,11 +77,11 @@ export default function CameraScreen() {
   };
 
   if (hasPermission === null) {
-    return <View />;
+    return <View style={styles.container}><ActivityIndicator size="large" color="#0000ff" /></View>;
   }
 
   if (hasPermission === false) {
-    return <Text>No access to camera</Text>;
+    return <View style={styles.container}><Text>No access to camera</Text></View>;
   }
 
   return (
@@ -92,9 +89,8 @@ export default function CameraScreen() {
       {isFocused && (
         <Camera
           style={styles.camera}
-          type={Camera.Constants.Type.back}
+          type={Camera.Constants.Type.back} // Ensure this property is available
           ref={(ref) => setCameraRef(ref)}
-          onRecordingStart={startTimer}
         >
           <View style={styles.controls}>
             {isRecording ? (
